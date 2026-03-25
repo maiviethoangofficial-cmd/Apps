@@ -1,0 +1,33 @@
+name: Tự động giải nén và Dọn dẹp
+
+on:
+  push:
+    paths:
+      - 'plus-admin-free.zip'
+  workflow_dispatch:
+
+jobs:
+  unzip-and-clean:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # Cấp quyền ghi để push tệp lên
+    
+    steps:
+      - name: Checkout mã nguồn
+        uses: actions/checkout@v4
+
+      - name: Giải nén tệp .zip
+        run: |
+          unzip -o plus-admin-free.zip -d ./
+          # Giải nén ngay tại thư mục gốc hoặc thư mục bạn muốn
+
+      - name: Xóa tệp .zip gốc
+        run: rm plus-admin-free.zip
+
+      - name: Lưu thay đổi và Push
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add .
+          git commit -m "Auto unzip and remove zip file" || exit 0
+          git push
