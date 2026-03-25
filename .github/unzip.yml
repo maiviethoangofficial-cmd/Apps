@@ -1,33 +1,35 @@
-name: Tự động giải nén và Dọn dẹp
+name: Tải và Giải nén PurpleAdmin
 
 on:
-  push:
-    paths:
-      - 'plus-admin-free.zip'
-  workflow_dispatch:
+  workflow_dispatch: # Cho phép bạn bấm nút chạy thủ công từ tab Actions
 
 jobs:
-  unzip-and-clean:
+  download-and-unzip:
     runs-on: ubuntu-latest
     permissions:
-      contents: write # Cấp quyền ghi để push tệp lên
+      contents: write
     
     steps:
-      - name: Checkout mã nguồn
+      - name: Kiểm tra mã nguồn hiện tại
         uses: actions/checkout@v4
 
-      - name: Giải nén tệp .zip
+      - name: Tải PurpleAdmin từ GitHub
         run: |
-          unzip -o plus-admin-free.zip -d ./
-          # Giải nén ngay tại thư mục gốc hoặc thư mục bạn muốn
+          # Tải tệp zip của nhánh chính (master hoặc main)
+          curl -L https://github.com/BootstrapDash/PurpleAdmin-Free-Admin-Template/archive/refs/heads/master.zip -o purple.zip
+          
+      - name: Giải nén và Dọn dẹp
+        run: |
+          unzip purple.zip
+          # Di chuyển tất cả nội dung từ thư mục vừa giải nén ra thư mục gốc
+          mv PurpleAdmin-Free-Admin-Template-master/* ./
+          # Xóa tệp zip và thư mục tạm
+          rm -rf purple.zip PurpleAdmin-Free-Admin-Template-master
 
-      - name: Xóa tệp .zip gốc
-        run: rm plus-admin-free.zip
-
-      - name: Lưu thay đổi và Push
+      - name: Đẩy tệp lên Repository của bạn
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add .
-          git commit -m "Auto unzip and remove zip file" || exit 0
+          git commit -m "Auto deploy PurpleAdmin Template" || exit 0
           git push
