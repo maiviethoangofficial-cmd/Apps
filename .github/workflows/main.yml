@@ -1,0 +1,35 @@
+name: Tải và Giải nén PurpleAdmin
+
+on:
+  workflow_dispatch: # Cho phép bạn bấm nút chạy thủ công từ tab Actions
+
+jobs:
+  download-and-unzip:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    
+    steps:
+      - name: Kiểm tra mã nguồn hiện tại
+        uses: actions/checkout@v4
+
+      - name: Tải PurpleAdmin từ GitHub
+        run: |
+          # Tải tệp zip của nhánh chính (master hoặc main)
+          curl -L https://github.com/BootstrapDash/PurpleAdmin-Free-Admin-Template/archive/refs/heads/master.zip -o purple.zip
+          
+      - name: Giải nén và Dọn dẹp
+        run: |
+          unzip purple.zip
+          # Di chuyển tất cả nội dung từ thư mục vừa giải nén ra thư mục gốc
+          mv PurpleAdmin-Free-Admin-Template-master/* ./
+          # Xóa tệp zip và thư mục tạm
+          rm -rf purple.zip PurpleAdmin-Free-Admin-Template-master
+
+      - name: Đẩy tệp lên Repository của bạn
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add .
+          git commit -m "Auto deploy PurpleAdmin Template" || exit 0
+          git push
